@@ -50,18 +50,22 @@ func (pri *PrivateKey) Public() *PublicKey {
 	return (*PublicKey)(&pri.PublicKey)
 }
 
-func (pri *PrivateKey) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
-	return (*ecies.PrivateKey)(pri).Decrypt(c, s1, s2)
+func (pri *PrivateKey) ECIESPrivateKey() *ecies.PrivateKey {
+	return (*ecies.PrivateKey)(pri)
 }
 
 func (pub *PublicKey) Marshal() ([]byte, error) {
 	return x509.MarshalPKIXPublicKey((*ecies.PublicKey)(pub).ExportECDSA())
 }
 
-func (pub *PublicKey) Encrypt(m, s1, s2 []byte) (ct []byte, err error) {
-	return pub.EncryptWithRand(rand.Reader, m, s1, s2)
+func (pri *PrivateKey) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
+	return (*ecies.PrivateKey)(pri).Decrypt(c, s1, s2)
 }
 
-func (pub *PublicKey) EncryptWithRand(rand io.Reader, m, s1, s2 []byte) (ct []byte, err error) {
-	return ecies.Encrypt(rand, (*ecies.PublicKey)(pub), m, s1, s2)
+func (pub *PublicKey) Encrypt(m, s1, s2 []byte) (ct []byte, err error) {
+	return pub.EncryptWithSeed(rand.Reader, m, s1, s2)
+}
+
+func (pub *PublicKey) EncryptWithSeed(seed io.Reader, m, s1, s2 []byte) (ct []byte, err error) {
+	return ecies.Encrypt(seed, (*ecies.PublicKey)(pub), m, s1, s2)
 }

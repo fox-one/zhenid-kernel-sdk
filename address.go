@@ -2,8 +2,10 @@ package sdk
 
 import (
 	"crypto/rand"
+	"io"
 
 	"github.com/MixinNetwork/mixin/crypto"
+	"github.com/ethereum/go-ethereum/crypto/ecies"
 )
 
 type Address struct {
@@ -69,8 +71,8 @@ func (a Address) PrivateViewKey() *crypto.Key {
 	return a.privateViewKey.Convert()
 }
 
-func (a Address) PrivateEncryptKey() *PrivateKey {
-	return a.privateEncryptKey
+func (a Address) PrivateEncryptKey() *ecies.PrivateKey {
+	return (*ecies.PrivateKey)(a.privateEncryptKey)
 }
 
 func (a Address) PublicSpendKey() *crypto.Key {
@@ -81,16 +83,20 @@ func (a Address) PublicViewKey() *crypto.Key {
 	return a.publicViewKey.Convert()
 }
 
-func (a Address) PublicEncryptKey() *PublicKey {
-	return a.publicEncryptKey
+func (a Address) PublicEncryptKey() *ecies.PublicKey {
+	return (*ecies.PublicKey)(a.publicEncryptKey)
 }
 
 func (a Address) Encrypt(m, s1, s2 []byte) (ct []byte, err error) {
-	return a.PublicEncryptKey().EncryptWithRand(rand.Reader, m, s1, s2)
+	return a.EncryptWithSeed(rand.Reader, m, s1, s2)
+}
+
+func (a Address) EncryptWithSeed(seed io.Reader, m, s1, s2 []byte) (ct []byte, err error) {
+	return a.publicEncryptKey.EncryptWithSeed(seed, m, s1, s2)
 }
 
 func (a Address) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
-	return a.PrivateEncryptKey().Decrypt(c, s1, s2)
+	return a.privateEncryptKey.Decrypt(c, s1, s2)
 }
 
 // TODO unimplement
