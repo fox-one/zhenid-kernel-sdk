@@ -1,80 +1,72 @@
 package sdk
 
 import (
-	"bytes"
-	"errors"
-	"strconv"
-	"strings"
+	"crypto/rand"
 
 	"github.com/MixinNetwork/mixin/crypto"
-	"github.com/btcsuite/btcutil/base58"
-)
-
-const (
-	AddressPrefix = "ZHENID-PRI:"
 )
 
 type Address struct {
-	PrivateSpendKey   crypto.Key
-	PrivateViewKey    crypto.Key
-	PrivateEncryptKey *PrivateKey
+	PrivateSpendKey   crypto.Key  `json:"spend,omitempty"`
+	PrivateViewKey    crypto.Key  `json:"view,omitempty"`
+	PrivateEncryptKey *PrivateKey `json:"encrypt_key,omitempty"`
 
-	PublicSpendKey   crypto.Key
-	PublicViewKey    crypto.Key
-	PublicEncryptKey *PublicKey
+	PublicSpendKey   crypto.Key `json:"public_spend,omitempty"`
+	PublicViewKey    crypto.Key `json:"public_view,omitempty"`
+	PublicEncryptKey *PublicKey `json:"public_encrypt_key,omitempty"`
 }
 
-func AddressFromString(s string) (Address, error) {
-	var a Address
-	if !strings.HasPrefix(s, AddressPrefix) {
-		return a, errors.New("invalid address network")
-	}
-	data := base58.Decode(s[len(AddressPrefix):])
-	if len(data) != 68 {
-		return a, errors.New("invalid address format")
-	}
-	checksum := crypto.NewHash(append([]byte(AddressPrefix), data[:64+91]...))
-	if !bytes.Equal(checksum[:4], data[64+91:]) {
-		return a, errors.New("invalid address checksum")
-	}
-	pub, err := ECIESPublicKeyFromBytes(data[64 : 64+91])
-	if err != nil {
-		return a, err
-	}
-	a.PublicEncryptKey = pub
-	copy(a.PublicSpendKey[:], data[:32])
-	copy(a.PublicViewKey[:], data[32:])
-	return a, nil
+// TODO unimplement
+func NewAddress() (*Address, error) {
+	panic("unimplement")
+	return nil, nil
 }
 
-func (a Address) String() string {
-	data := make([]byte, 64+91)
-	copy(data[:32], a.PublicSpendKey[:])
-	copy(data[32:64], a.PublicViewKey[:])
-	pub, _ := a.PublicEncryptKey.Marshal()
-	copy(data[64:], pub)
-	checksum := crypto.NewHash(data)
-	return AddressPrefix + base58.Encode(append(data, checksum[:4]...))
+// TODO unimplement
+func AddressFromString(s string) (*Address, error) {
+	panic("unimplement")
+	return nil, nil
 }
 
+// TODO unimplement
 func (a Address) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.Quote(a.String())), nil
+	panic("unimplement")
+	return nil, nil
 }
 
+// TODO unimplement
 func (a *Address) UnmarshalJSON(b []byte) error {
-	unquoted, err := strconv.Unquote(string(b))
-	if err != nil {
-		return err
-	}
-	m, err := AddressFromString(unquoted)
-	if err != nil {
-		return err
-	}
-	a.PrivateSpendKey = m.PrivateSpendKey
-	a.PrivateViewKey = m.PrivateViewKey
-	a.PrivateEncryptKey = m.PrivateEncryptKey
-	a.PublicSpendKey = m.PublicSpendKey
-	a.PublicViewKey = m.PublicViewKey
-	a.PublicEncryptKey = m.PublicEncryptKey
+	panic("unimplement")
+	return nil
+}
+
+func (a Address) Encrypt(m, s1, s2 []byte) (ct []byte, err error) {
+	return a.PublicEncryptKey.EncryptWithRand(rand.Reader, m, s1, s2)
+}
+
+func (a Address) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
+	return a.PrivateEncryptKey.Decrypt(c, s1, s2)
+}
+
+// TODO unimplement
+func (a Address) Sign(raw []byte) (string, error) {
+	panic("unimplement")
+	return "", nil
+}
+
+// TODO unimplement
+func (a Address) Verify(raw, s []byte) error {
+	panic("unimplement")
+	return nil
+}
+
+// TODO unimplement
+func (a Address) GhostKey(r crypto.Hash) (*crypto.Hash, error) {
+	panic("unimplement")
+	return nil, nil
+}
+
+func (a Address) VerifyGhostKey(mask, key crypto.Hash) error {
+	panic("unimplement")
 	return nil
 }
