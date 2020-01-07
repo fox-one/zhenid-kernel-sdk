@@ -2,7 +2,9 @@ package sdk
 
 import (
 	"testing"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,5 +27,30 @@ func TestKey(t *testing.T) {
 		key1, err := KeyFromString(k)
 		assert.Nil(err, "key from string")
 		assert.Equal(key, key1, "key not matched")
+	}
+
+	{
+		claims := jwt.MapClaims{
+			"exp": time.Now().AddDate(0, 0, 1).Unix(),
+		}
+
+		token, err := jwt.NewWithClaims(key, claims).SignedString(key)
+		assert.Nil(err, "signed string")
+
+		parseFunc := func(token string, k interface{}) error {
+			_, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+				_, ok := t.Method.(*Key)
+				assert.True(ok, "signing method not match")
+
+				return k, nil
+			})
+			return err
+		}
+
+		err = parseFunc(token, key)
+		assert.NotNil(err, "jwt parse")
+
+		err = parseFunc(token, key.PublicKey())
+		assert.Nil(err, "jwt parse")
 	}
 }

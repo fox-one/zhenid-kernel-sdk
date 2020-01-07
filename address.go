@@ -94,19 +94,6 @@ func (a Address) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
 }
 
 // TODO unimplement
-func (a Address) Sign(raw []byte) (crypto.Signature, error) {
-	panic("unimplement")
-	var sig crypto.Signature
-	return sig, nil
-}
-
-// TODO unimplement
-func (a Address) Verify(raw, s []byte) error {
-	panic("unimplement")
-	return nil
-}
-
-// TODO unimplement
 func (a Address) GhostPublicKey(r crypto.Key) (crypto.Key, error) {
 	panic("unimplement")
 	var key crypto.Key
