@@ -99,14 +99,10 @@ func (a Address) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
 	return a.privateEncryptKey.Decrypt(c, s1, s2)
 }
 
-// TODO unimplement
-func (a Address) GhostPublicKey(r crypto.Key) (crypto.Key, error) {
-	panic("unimplement")
-	var key crypto.Key
-	return key, nil
+func (a Address) GhostPublicKey(r *crypto.Key, outputIndex uint64) *crypto.Key {
+	return crypto.DeriveGhostPublicKey(r, a.PublicViewKey(), a.PublicSpendKey(), outputIndex)
 }
 
-func (a Address) GhostPrivateKey(mask, key crypto.Hash) error {
-	panic("unimplement")
-	return nil
+func (a Address) GhostPrivateKey(mask, key *crypto.Key, outputIndex uint64) *crypto.Key {
+	return crypto.DeriveGhostPrivateKey(mask, a.PrivateViewKey(), a.PrivateSpendKey(), outputIndex)
 }
