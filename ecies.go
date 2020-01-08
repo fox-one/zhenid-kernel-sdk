@@ -45,6 +45,10 @@ func (pri *PrivateKey) Marshal() ([]byte, error) {
 	return x509.MarshalECPrivateKey((*ecies.PrivateKey)(pri).ExportECDSA())
 }
 
+func (pri *PrivateKey) MarshalKey() ([]byte, error) {
+	return x509.MarshalECPrivateKey((*ecies.PrivateKey)(pri).ExportECDSA())
+}
+
 func (pri *PrivateKey) Public() *PublicKey {
 	return (*PublicKey)(&pri.PublicKey)
 }

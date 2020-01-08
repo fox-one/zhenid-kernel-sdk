@@ -1,14 +1,13 @@
 package sdk
 
 import (
-	"io"
-	"bytes"
+		// "io"
 	"errors"
 	"strings"
 
-	"crypto/rand"
+	// "crypto/rand"
 
-	"github.com/fox-one/zhenid-kernel-sdk/crypto/ecies"
+	// "github.com/fox-one/zhenid-kernel-sdk/crypto/ecies"
 	"github.com/MixinNetwork/mixin/crypto"
 	"github.com/btcsuite/btcutil/base58"
 	
@@ -17,25 +16,20 @@ import (
 const HXNetwork = "HX"
 
 type Address struct {
-	privateSpendKey   Key
+	privateSpendKey   Key 
 	privateViewKey    Key
-	privateEncryptKey *PrivateKey
+	privateEncryptKey PrivateEncryptyKey //121 bytes
 
 	publicSpendKey   Key
 	publicViewKey    Key
-	publicEncryptKey *PublicKey
+	publicEncryptKey PublicEncryptyKey //91bytes
 }
 
-/// 生成新的用户地址
-///	
-///
-///
-func NewAddress() (Address, error) {
-	ek, err := NewECIESPrivateKey()
-	if err != nil {
-		return nil, err
-	}
-
+/// 生成新的地址， 地址有3对密钥构成，分别是 Spend Key、 View Key 和 Encrypt Key
+///	Spend Key 和 View Key 主要是在恒信的区块链网络中使用
+///	Ecrypt Key 主要作用是用于对 数据仓库中加密数据的密钥进行密钥交换
+/// 三个密钥都不可以泄漏
+func NewAddress() (*Address, error) {
 	sk, err := NewKey()
 	if err != nil {
 		return nil, err
@@ -46,21 +40,51 @@ func NewAddress() (Address, error) {
 		return nil, err
 	}
 
+	ek, err := NewECIESPrivateKey()
+	if err != nil {
+		return nil, err
+	}
+
+	sek, err := ek.Marshal()
+	if err != nil {
+		return nil, err
+	}
+
+	pek, err := ek.Public().Marshal()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Address{
 		privateSpendKey:   sk,
 		privateViewKey:    vk,
-		privateEncryptKey: ek,
+		privateEncryptKey: sek,
 
 		publicSpendKey:   sk.PublicKey(),
 		publicViewKey:    vk.PublicKey(),
-		publicEncryptKey: ek.Public(),
+		publicEncryptKey: pek,
 	}, nil
 }
 
 
+// 根据用户的地址生成对外的交易地址
+// 地址的格式规定如下 
+// Address： HX + Base58(Private Spend Key Private View Key +Private EncryptKey + CRC)
+func (a Address) String() string {
+	data := append([]byte(HXNetwork), a.publicSpendKey[:]...)
+	data = append(data, a.publicViewKey[:]...)
+	data = append(data, a.publicEncryptKey...)
+	checksum := crypto.NewHash(data)
+
+	data = append(a.publicSpendKey[:], a.publicViewKey[:]...)
+    data = append(data, a.publicEncryptKey...)
+	data = append(data, checksum[:4]...)
+	
+	return HXNetwork + base58.Encode(data)
+}
 
 // 通过字符串生成用户地址
-// 字符串格式 HX + Base58(Private Spend Key) + Base58(Private View Key) + Base58(Private EncryptKey) + CR4
+// 字符串格式 
 // 
 // 返回地址或者错误
 func AddressFromString(s string) (Address, error) {
@@ -69,23 +93,31 @@ func AddressFromString(s string) (Address, error) {
 		return a, errors.New("invalid address network")
 	}
 	data := base58.Decode(s[len(HXNetwork):])
-	if len(data) != 68 {
+	if len(data) != 159 {
 		return a, errors.New("invalid address format")
 	}
-
-	copy(a.privateSpendKey[:], data[:32])
-	copy(a.privateViewKey[:], data[32:])
-	// copy(a.privateEncryptKey[:], data[64:])
+	// 分配 91 bytes 的存储空间
+	a.publicEncryptKey = make([]byte, 91)
+	
+	copy(a.publicSpendKey[:], data[:32])
+	copy(a.publicViewKey[:], data[32:64])
+	copy(a.publicEncryptKey[:], data[64:])
 	return a, nil
 }
 
-// TODO unimplement
+// 生成地址的JSON格式
+//
+//
+//
 func (a Address) MarshalJSON() ([]byte, error) {
 	panic("unimplement")
 	return nil, nil
 }
 
-// TODO unimplement
+// 通过JSON恢复地址
+//
+//
+//
 func (a *Address) UnmarshalJSON(b []byte) error {
 	panic("unimplement")
 	return nil
@@ -99,8 +131,9 @@ func (a Address) PrivateViewKey() *crypto.Key {
 	return a.privateViewKey.Convert()
 }
 
-func (a Address) PrivateEncryptKey() *ecies.PrivateKey {
-	return (*ecies.PrivateKey)(a.privateEncryptKey)
+func (a Address) PrivateEncryptKey() *PrivateKey {
+	pri, _ := ECIESPrivateKeyFromBytes(a.privateEncryptKey)
+	return pri
 }
 
 func (a Address) PublicSpendKey() *crypto.Key {
@@ -111,21 +144,24 @@ func (a Address) PublicViewKey() *crypto.Key {
 	return a.publicViewKey.Convert()
 }
 
-func (a Address) PublicEncryptKey() *ecies.PublicKey {
-	return (*ecies.PublicKey)(a.publicEncryptKey)
+func (a Address) PublicEncryptKey() *PublicKey {
+	pub, _ := ECIESPublicKeyFromBytes(a.privateEncryptKey)
+	return pub
 }
 
-func (a Address) Encrypt(m, s1, s2 []byte) (ct []byte, err error) {
-	return a.EncryptWithSeed(rand.Reader, m, s1, s2)
-}
+// func (a Address) Encrypt(m, s1, s2 []byte) (ct []byte, err error) {
+// 	return a.EncryptWithSeed(rand.Reader, m, s1, s2)
+// }
 
-func (a Address) EncryptWithSeed(seed io.Reader, m, s1, s2 []byte) (ct []byte, err error) {
-	return a.publicEncryptKey.EncryptWithSeed(seed, m, s1, s2)
-}
+// func (a Address) EncryptWithSeed(seed io.Reader, m, s1, s2 []byte) (ct []byte, err error) {
+// 	pri := a.PrivateEncryptKey()
+// 	return &pri.EncryptWithSeed(seed, m, s1, s2)
+// }
 
-func (a Address) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
-	return a.privateEncryptKey.Decrypt(c, s1, s2)
-}
+// func (a Address) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
+// 	pub := a.PublicEncryptKey()
+// 	return &pub.Decrypt(c, s1, s2)
+// }
 
 func (a Address) GhostPublicKey(r *crypto.Key, outputIndex uint64) *crypto.Key {
 	return crypto.DeriveGhostPublicKey(r, a.PublicViewKey(), a.PublicSpendKey(), outputIndex)

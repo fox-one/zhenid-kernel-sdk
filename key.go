@@ -11,6 +11,8 @@ import (
 )
 
 type Key crypto.Key
+type PrivateEncryptyKey []byte
+type PublicEncryptyKey []byte
 
 var (
 	ErrED25519Verification = errors.New("ed25519: verification error")
