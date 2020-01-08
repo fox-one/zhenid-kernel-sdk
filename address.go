@@ -4,6 +4,8 @@ import (
 		// "io"
 	"errors"
 	"strings"
+	"strconv"
+	"bytes"
 
 	// "crypto/rand"
 
@@ -22,7 +24,7 @@ type Address struct {
 
 	publicSpendKey   Key
 	publicViewKey    Key
-	publicEncryptKey PublicEncryptyKey //91bytes
+	publicEncryptKey PublicEncryptyKey //91 bytes
 }
 
 /// 生成新的地址， 地址有3对密钥构成，分别是 Spend Key、 View Key 和 Encrypt Key
@@ -96,6 +98,11 @@ func AddressFromString(s string) (Address, error) {
 	if len(data) != 159 {
 		return a, errors.New("invalid address format")
 	}
+	checksum := crypto.NewHash(append([]byte(HXNetwork), data[:155]...))
+	if !bytes.Equal(checksum[:4], data[155:]) {
+		return a, errors.New("invalid address checksum")
+	}
+
 	// 分配 91 bytes 的存储空间
 	a.publicEncryptKey = make([]byte, 91)
 	
@@ -105,21 +112,36 @@ func AddressFromString(s string) (Address, error) {
 	return a, nil
 }
 
-// 生成地址的JSON格式
-//
+// 生成地址的字符串
+// 
 //
 //
 func (a Address) MarshalJSON() ([]byte, error) {
-	panic("unimplement")
-	return nil, nil
+	return []byte(strconv.Quote(a.String())), nil
 }
 
-// 通过JSON恢复地址
-//
+// 通过字符串恢复地址
+// 自己有公钥可用，私钥并没有什么用处
 //
 //
 func (a *Address) UnmarshalJSON(b []byte) error {
-	panic("unimplement")
+	unquoted, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+
+	m, err := AddressFromString(unquoted)
+	if err != nil {
+		return err
+	}
+	
+	a.privateSpendKey = m.privateSpendKey
+	a.privateViewKey = m.privateViewKey
+	a.publicSpendKey = m.publicSpendKey
+	a.publicViewKey = m.publicViewKey
+	a.privateEncryptKey = m.privateEncryptKey
+	a.publicEncryptKey = m.publicEncryptKey
+
 	return nil
 }
 
