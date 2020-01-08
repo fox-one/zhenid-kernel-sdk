@@ -7,8 +7,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"io"
-
-	"github.com/ethereum/go-ethereum/crypto/ecies"
+	"github.com/fox-one/zhenid-kernel-sdk/crypto/ecies"
 )
 
 type PrivateKey ecies.PrivateKey

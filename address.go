@@ -1,12 +1,20 @@
 package sdk
 
 import (
-	"crypto/rand"
 	"io"
+	"bytes"
+	"errors"
+	"strings"
 
+	"crypto/rand"
+
+	"github.com/fox-one/zhenid-kernel-sdk/crypto/ecies"
 	"github.com/MixinNetwork/mixin/crypto"
-	"github.com/ethereum/go-ethereum/crypto/ecies"
+	"github.com/btcsuite/btcutil/base58"
+	
 )
+
+const HXNetwork = "HX"
 
 type Address struct {
 	privateSpendKey   Key
@@ -18,7 +26,11 @@ type Address struct {
 	publicEncryptKey *PublicKey
 }
 
-func NewAddress() (*Address, error) {
+/// 生成新的用户地址
+///	
+///
+///
+func NewAddress() (Address, error) {
 	ek, err := NewECIESPrivateKey()
 	if err != nil {
 		return nil, err
@@ -45,10 +57,26 @@ func NewAddress() (*Address, error) {
 	}, nil
 }
 
-// TODO unimplement
-func AddressFromString(s string) (*Address, error) {
-	panic("unimplement")
-	return nil, nil
+
+
+// 通过字符串生成用户地址
+// 字符串格式 HX + Base58(Private Spend Key) + Base58(Private View Key) + Base58(Private EncryptKey) + CR4
+// 
+// 返回地址或者错误
+func AddressFromString(s string) (Address, error) {
+	var a Address
+	if !strings.HasPrefix(s, HXNetwork) {
+		return a, errors.New("invalid address network")
+	}
+	data := base58.Decode(s[len(HXNetwork):])
+	if len(data) != 68 {
+		return a, errors.New("invalid address format")
+	}
+
+	copy(a.privateSpendKey[:], data[:32])
+	copy(a.privateViewKey[:], data[32:])
+	// copy(a.privateEncryptKey[:], data[64:])
+	return a, nil
 }
 
 // TODO unimplement

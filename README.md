@@ -1,1 +1,1 @@
-# zhenid-kernel-sdk
+# ZhenID Kernel SDK
