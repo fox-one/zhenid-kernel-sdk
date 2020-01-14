@@ -2,7 +2,10 @@
 
 Kernel只与API接入点进行交互，不对外提供服务。Kernel将为所有的接入点提供一个session id/secret来完成鉴权。所有的请求，都需要使用session id/secret签发SigningMethodES256的jwt token。
 
-Kernel的主要职责为: a. 读取链上snapshot list; b. 写入transaction; c. 读取公开信息（已注册机构列表, 已注册接入点列表, 业务方列表, 证书类型列表，等）
+Kernel的主要职责为: 
+a. 读取链上snapshot list; 
+b. 写入transaction; 
+c. 读取公开信息（已注册机构列表, 已注册接入点列表, 业务方列表, 证书类型列表，等）
 
 ## Transaction APIs
 
