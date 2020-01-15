@@ -103,6 +103,19 @@ func (a Address) GhostPublicKey(r *crypto.Key, outputIndex uint64) *crypto.Key {
 	return crypto.DeriveGhostPublicKey(r, a.PublicViewKey(), a.PublicSpendKey(), outputIndex)
 }
 
-func (a Address) GhostPrivateKey(mask, key *crypto.Key, outputIndex uint64) *crypto.Key {
+func (a Address) GhostPrivateKey(mask *crypto.Key, outputIndex uint64) *crypto.Key {
 	return crypto.DeriveGhostPrivateKey(mask, a.PrivateViewKey(), a.PrivateSpendKey(), outputIndex)
+}
+
+func (a Address) VerifyOutputs(outputs []*Output) []int {
+	var verifiedOutputs = make([]int, 0, len(outputs))
+	for idx, output := range outputs {
+		for _, key := range output.Keys {
+			if crypto.ViewGhostOutputKey(&key, a.PrivateViewKey(), &output.Mask, uint64(idx)).String() == a.PublicSpendKey().String() {
+				verifiedOutputs = append(verifiedOutputs, idx)
+				break
+			}
+		}
+	}
+	return verifiedOutputs
 }
