@@ -143,6 +143,83 @@ since: 1234
 }
 ```
 
+### Read Transaction Detail
+
+```http
+GET /transaction/:tx-hash
+
+Content-Type: application/json
+Authorization: Bearer **token**
+```
+
+**Response:**
+
+```javascript
+{
+    "code": 0,
+    "data": {
+        "transaction": {
+            "asset": "xxx",
+            "extra": "{\"file_hash\":\"xxxx\"}",
+            "hash": "xxx",
+            "inputs": [{
+                "hash": "xxx",
+                "index": 1
+            }],
+            "outputs": [{
+                "amount": "0.01",
+                "keys": [
+                    "xxxx"
+                ],
+                "mask": "xxx",
+                "script": "fffe01",
+                "type": 0
+            }],
+            "version": 1
+        },
+        "signatures": [["xxx"]]
+    }
+}
+```
+
+### Read UTXO
+
+```http
+GET /transaction/utxo
+
+Content-Type: application/json
+Authorization: Bearer **token**
+```
+
+**Param:**
+
+```form
+transaction_hash = xxx
+index = 0
+```
+
+**Response:**
+
+```javascript
+{
+    "code": 0,
+    "data": {
+        "output": {
+            "amount": "0.01",
+            "keys": [
+                "xxxx"
+            ],
+            "mask": "xxx",
+            "script": "fffe01",
+            "type": 0
+        },
+        "transaction_hash": "xxx",
+        "index": 0,
+        "lock": "xxx" // 如果output被消费，则指向消费该output的transaction；否则为空
+    }
+}
+```
+
 ## 公共数据
 
 ### 机构列表
