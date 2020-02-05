@@ -60,6 +60,7 @@ Authorization: Bearer **token**
 {
     "code": 0,
     "data": [{
+        "id": 1,
         "name": "派出所",
         "address": "HXxxxx"
     }]
@@ -81,7 +82,7 @@ Authorization: Bearer **token**
 {
     "code": 0,
     "data": [{
-        "card_id": 1,
+        "id": 1,
         "name": "Hengxin 1",
         "logo": "https://imgs.heng.xin/haha.png"
     }]
