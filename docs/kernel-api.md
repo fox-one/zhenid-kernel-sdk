@@ -2,10 +2,11 @@
 
 Kernel只与API接入点进行交互，不对外提供服务。Kernel将为所有的接入点提供一个session id/secret来完成鉴权。所有的请求，都需要使用session id/secret签发SigningMethodES256的jwt token。
 
-Kernel的主要职责为: 
-a. 读取链上snapshot list; 
-b. 写入transaction; 
-c. 读取公开信息（已注册机构列表, 已注册接入点列表, 业务方列表, 证书类型列表，等）
+Kernel的主要职责为:
+a. 读取链上snapshot list;
+b. 写入transaction;
+c. 读取transaction详情（附带transaction签名）;
+d. 读取UTXO信息。
 
 ## Transaction APIs
 
@@ -217,92 +218,5 @@ index = 0
         "index": 0,
         "lock": "xxx" // 如果output被消费，则指向消费该output的transaction；否则为空
     }
-}
-```
-
-## 公共数据
-
-### 机构列表
-
-```http
-GET /organizations
-
-Content-Type: application/json
-Authorization: Bearer **token**
-```
-
-**Response:**
-
-```javascript
-{
-    "code": 0,
-    "data": [{
-        "name": "派出所",
-        "address": "HXxxxx"
-    }]
-}
-```
-
-### 接入点列表
-
-```http
-GET /endpoints
-
-Content-Type: application/json
-Authorization: Bearer **token**
-```
-
-**Response:**
-
-```javascript
-{
-    "code": 0,
-    "data": [{
-        "name": "Hengxin 1",
-        "endpoint": "https://api1.heng.xin"
-    }]
-}
-```
-
-### 业务方列表
-
-```http
-GET /service-providers
-
-Content-Type: application/json
-Authorization: Bearer **token**
-```
-
-**Response:**
-
-```javascript
-{
-    "code": 0,
-    "data": [{
-        "name": "Hengxin 1",
-        "endpoint": "https://service-api1.heng.xin"
-    }]
-}
-```
-
-### 证件列表
-
-```http
-GET /cards
-
-Content-Type: application/json
-Authorization: Bearer **token**
-```
-
-**Response:**
-
-```javascript
-{
-    "code": 0,
-    "data": [{
-        "card_type": 1,
-        "name": "Hengxin 1",
-        "logo": "https://imgs.heng.xin/haha.png"
-    }]
 }
 ```
