@@ -89,8 +89,8 @@ Authorization: Bearer **token**
 }
 ```
 
-## 多人联合签署合同 (TODO)
-
 ### 申请签发文件
+
+## 多人联合签署合同 (TODO)
 
 ### 收集签名

@@ -1,21 +1,33 @@
 # Kernel API
 
-Kernel只与API接入点进行交互，不对外提供服务。Kernel将为所有的接入点提供一个session id/secret来完成鉴权。所有的请求，都需要使用session id/secret签发SigningMethodES256的jwt token。
+Kernel只与接入点进行交互，不对外提供服务。
 
 Kernel的主要职责为:
-a. 读取链上snapshot list;
-b. 写入transaction;
-c. 读取transaction详情（附带transaction签名）;
-d. 读取UTXO信息。
+
+- 读取链上snapshot list;
+- 写入transaction;
+- 读取UTXO信息。
 
 ## Transaction APIs
+
+### Extra
+
+```javascript
+{
+    "h": "xxx",     // file hash
+    "exp": 1,       // expired at, unix timestamp, in s
+    "sp": 1,        // service provider id
+    "csp": 1,       // optional, certificate service provider id
+    "c": 1,         // card type
+}
+```
 
 ### Transaction Model
 
 ```javascript
 {
     "asset": "a99c2e0e2b1da4d648755ef19bd95139acbbe6564cfb06dec7cd34931ca72cdc",
-    "extra": "{\"file_hash\":\"xxxx\"}",
+    "extra": "{\"h\":\"xxxx\"}",
     "hash": "xxx",
     "inputs": [{
         "hash": "xxx",
@@ -49,7 +61,7 @@ Authorization: Bearer **token**
 {
     "transaction": {
         "asset": "xxx",
-        "extra": "{\"file_hash\":\"xxxx\"}",
+        "extra": "{\"h\":\"xxxx\"}",
         "hash": "xxx",
         "inputs": [{
             "hash": "xxx",
@@ -74,25 +86,6 @@ Authorization: Bearer **token**
 
 ```javascript
 {
-    "transaction": {
-        "asset": "a99c2e0e2b1da4d648755ef19bd95139acbbe6564cfb06dec7cd34931ca72cdc",
-        "extra": "{\"file_hash\":\"xxxx\"}",
-        "hash": "xxx",
-        "inputs": [{
-            "hash": "xxx",
-            "index": 1
-        }],
-        "outputs": [{
-            "amount": "0.01",
-            "keys": [
-                "xxxx"
-            ],
-            "mask": "xxx",
-            "script": "fffe01",
-            "type": 0
-        }],
-        "version": 1
-    },
     "code": 0
 }
 ```
@@ -119,7 +112,7 @@ since: 1234
     "data": [{
         "transaction": {
             "asset": "a99c2e0e2b1da4d648755ef19bd95139acbbe6564cfb06dec7cd34931ca72cdc",
-            "extra": "{\"file_hash\":\"xxxx\"}",
+            "extra": "{\"h\":\"xxxx\"}",
             "hash": "xxx",
             "inputs": [{
                 "hash": "xxx",
@@ -138,48 +131,10 @@ since: 1234
         },
         "timestamp": 1575387731172983000,
         "topology": 12792651,
-        "signature": "xxx"
+        "transaction_signatures": [["xxx"]],
+        "snapshot_signature": "xxx"
     }],
     "code": 0
-}
-```
-
-### Read Transaction Detail
-
-```http
-GET /transaction/:tx-hash
-
-Content-Type: application/json
-Authorization: Bearer **token**
-```
-
-**Response:**
-
-```javascript
-{
-    "code": 0,
-    "data": {
-        "transaction": {
-            "asset": "xxx",
-            "extra": "{\"file_hash\":\"xxxx\"}",
-            "hash": "xxx",
-            "inputs": [{
-                "hash": "xxx",
-                "index": 1
-            }],
-            "outputs": [{
-                "amount": "0.01",
-                "keys": [
-                    "xxxx"
-                ],
-                "mask": "xxx",
-                "script": "fffe01",
-                "type": 0
-            }],
-            "version": 1
-        },
-        "signatures": [["xxx"]]
-    }
 }
 ```
 
