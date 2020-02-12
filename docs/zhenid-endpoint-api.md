@@ -133,7 +133,8 @@ from: 1234
         "timestamp": 1575387731172983000,
         "topology": 12792651,
         "transaction_signatures": [["xxx"]],
-        "snapshot_signature": "xxx"
+        "signature": "xxx",
+        "version": 1
     }]
 }
 ```
@@ -273,7 +274,8 @@ POST /transaction
         "timestamp": 1575387731172983000,
         "topology": 12792651,
         "transaction_signatures": [["xxx"]],
-        "snapshot_signature": "xxx"
+        "signature": "xxx",
+        "version": 1
     }
 }
 ```

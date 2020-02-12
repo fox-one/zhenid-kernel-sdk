@@ -66,7 +66,8 @@ from: 1234
         "timestamp": 1575387731172983000,
         "topology": 12792651,
         "transaction_signatures": [["xxx"]],
-        "snapshot_signature": "xxx"
+        "signature": "xxx",
+        "version": 1
     }]
 }
 ```
@@ -178,32 +179,7 @@ POST /transaction
 
 ```javascript
 {
-    "code": 0,
-    "data": {
-        "transaction": {
-            "asset": "a99c2e0e2b1da4d648755ef19bd95139acbbe6564cfb06dec7cd34931ca72cdc",
-            "extra": "{\"h\":\"xxxx\"}",
-            "hash": "xxx",
-            "inputs": [{
-                "hash": "xxx",
-                "index": 1
-            }],
-            "outputs": [{
-                "amount": "0.01",
-                "keys": [
-                    "xxxx"
-                ],
-                "mask": "xxx",
-                "script": "fffe01",
-                "type": 0
-            }],
-            "version": 1
-        },
-        "timestamp": 1575387731172983000,
-        "topology": 12792651,
-        "transaction_signatures": [["xxx"]],
-        "snapshot_signature": "xxx"
-    }
+    "code": 0
 }
 ```
 
