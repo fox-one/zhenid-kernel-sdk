@@ -7,6 +7,7 @@ import (
 	"errors"
 
 	"github.com/MixinNetwork/mixin/crypto"
+	"github.com/MixinNetwork/mixin/common"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -25,20 +26,22 @@ func init() {
 	})
 }
 
-func NewKey() (Key, error) {
+func NewKey() (Key, Key, error) {
 	seed := make([]byte, 64)
 	_, err := rand.Read(seed)
 	if err != nil {
-		return Key{}, err
+		return Key{}, Key{}, err
 	}
 	return NewKeyWithSeed(seed)
 }
 
-func NewKeyWithSeed(seed []byte) (Key, error) {
+func NewKeyWithSeed(seed []byte) (Key, Key, error) {
 	if len(seed) != 64 {
-		return Key{}, errors.New("seed length must be 64")
+		return Key{}, Key{}, errors.New("seed length must be 64")
 	}
-	return (Key)(crypto.NewKeyFromSeed(seed)), nil
+	address := common.NewAddressFromSeed(seed)
+
+	return (Key)(address.PublicSpendKey), (Key)(address.PublicViewKey) , nil
 }
 
 func KeyFromString(s string) (Key, error) {

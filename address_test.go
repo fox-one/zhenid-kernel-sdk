@@ -26,29 +26,28 @@ func TestAddressFromString(t *testing.T) {
 }
 
 func TestPublicGhostKey(t *testing.T) {
-
 	const desAddressString = "HX2TrZbAJ8oHYrqJmqfJor5YGAhHB1RwzS4w3rC6abdAj3zciyNREFBg8LmdLTtgNZs5hG3Gjrf94L536TXTgoMRRATEhZwT9hdAyz7PWkgTQKRNMxJPFBwufT59DpJHRf26KZYFzf47QeaTLcV83Msh3mfmrNXhxfvPSBBdxHwfgqmZGheg54LaSjtVAit481Rbt7sTfNJaHuec9XSmAkZVW9Aa"
 	desAddress, _ := AddressFromString(desAddressString)
 
-	seed, _ := NewKey()
+	sk, _, _ := NewKey()
 
-	ghostKey := desAddress.GhostPublicKey(seed.Convert(), 0)
+	ghostKey := desAddress.GhostPublicKey(sk.Convert(), 0)
 	fmt.Println(ghostKey)
 }
 
 func TestPrivateGhostKey(t *testing.T) {
 	address, _ := NewAddress()
-	seed, _ := NewKey()
-	ghostKey := address.GhostPublicKey(seed.Convert(), 0)
+	sk, _ , _ := NewKey()
+	ghostKey := address.GhostPublicKey(sk.Convert(), 0)
 	fmt.Println(ghostKey)
 }
 
 func TestSignAndVerify(t *testing.T) {
 	address, _ := NewAddress()
-	seed, _ := NewKey()
-	ghosPrivatetKey := address.GhostPublicKey(seed.Convert(), 0)
+	sk,_, _ := NewKey()
+	ghosPrivatetKey := address.GhostPublicKey(sk.Convert(), 0)
 
-	ghosPublicKey := address.GhostPublicKey(seed.Convert(), 0)
+	ghosPublicKey := address.GhostPublicKey(sk.Convert(), 0)
 	fmt.Println(ghosPrivatetKey)
 	fmt.Println(ghosPublicKey)
-
+}

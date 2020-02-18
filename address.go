@@ -31,15 +31,15 @@ type Address struct {
 //	Ecrypt Key 主要作用是用于对 数据仓库中加密数据的密钥进行密钥交换
 // 三个密钥都不可以泄漏
 func NewAddress() (*Address, error) {
-	sk, err := NewKey()
+	sk, vk, err := NewKey()
 	if err != nil {
 		return nil, err
 	}
 
-	vk, err := NewKey()
-	if err != nil {
-		return nil, err
-	}
+	// vk, err := NewKey()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	ek, err := NewECIESPrivateKey()
 	if err != nil {
@@ -69,7 +69,7 @@ func NewAddress() (*Address, error) {
 
 // 根据用户的地址生成对外的交易地址
 // 地址的格式规定如下
-// Address： HX + Base58(Private Spend Key Private View Key +Private EncryptKey + CRC)
+// Address： HX + Base58(Public Spend Key + Public View Key + Public EncryptKey + CRC)
 func (a Address) String() string {
 	data := append([]byte(HXNetwork), a.publicSpendKey[:]...)
 	data = append(data, a.publicViewKey[:]...)

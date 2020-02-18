@@ -16,17 +16,17 @@ func TestKey(t *testing.T) {
 		k = "9721a9bd1e9fd2a6a999d9442a2d20974c67e8b55746b48d318634c314fa9302"
 	)
 
-	key, err := NewKeyWithSeed([]byte(s))
+	sk, _, err := NewKeyWithSeed([]byte(s))
 	assert.Nil(err, "new key with seed")
 
 	{
-		bts, err := key.MarshalJSON()
+		bts, err := sk.MarshalJSON()
 		assert.Nil(err, "marshal")
 		assert.Equal(k, string(bts), "key not matched")
 
 		key1, err := KeyFromString(k)
 		assert.Nil(err, "key from string")
-		assert.Equal(key, key1, "key not matched")
+		assert.Equal(sk, key1, "key not matched")
 	}
 
 	{
@@ -34,7 +34,7 @@ func TestKey(t *testing.T) {
 			"exp": time.Now().AddDate(0, 0, 1).Unix(),
 		}
 
-		token, err := jwt.NewWithClaims(key, claims).SignedString(key)
+		token, err := jwt.NewWithClaims(sk, claims).SignedString(sk)
 		assert.Nil(err, "signed string")
 
 		parseFunc := func(token string, k interface{}) error {
@@ -47,10 +47,10 @@ func TestKey(t *testing.T) {
 			return err
 		}
 
-		err = parseFunc(token, key)
+		err = parseFunc(token, sk)
 		assert.NotNil(err, "jwt parse")
 
-		err = parseFunc(token, key.PublicKey())
+		err = parseFunc(token, sk.PublicKey())
 		assert.Nil(err, "jwt parse")
 	}
 }
