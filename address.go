@@ -207,3 +207,5 @@ func (a Address) VerifyOutputs(outputs []*Output) []int {
 	}
 	return verifiedOutputs
 }
+
+

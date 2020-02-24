@@ -7,13 +7,19 @@ import (
 	"errors"
 
 	"github.com/MixinNetwork/mixin/crypto"
-	"github.com/MixinNetwork/mixin/common"
 	"github.com/dgrijalva/jwt-go"
 )
 
 type Key crypto.Key
 type PrivateEncryptyKey []byte
 type PublicEncryptyKey []byte
+
+type HXAddress struct {
+	PrivateSpendKey crypto.Key
+	PrivateViewKey  crypto.Key
+	PublicSpendKey  crypto.Key
+	PublicViewKey   crypto.Key
+}
 
 var (
 	ErrED25519Verification = errors.New("ed25519: verification error")
@@ -39,9 +45,24 @@ func NewKeyWithSeed(seed []byte) (Key, Key, error) {
 	if len(seed) != 64 {
 		return Key{}, Key{}, errors.New("seed length must be 64")
 	}
-	address := common.NewAddressFromSeed(seed)
+	address := NewAddressFromSeed(seed)
 
 	return (Key)(address.PublicSpendKey), (Key)(address.PublicViewKey) , nil
+}
+
+func NewAddressFromSeed(seed []byte) HXAddress {
+	hash1 := crypto.NewHash(seed)
+	hash2 := crypto.NewHash(hash1[:])
+	src := append(hash1[:], hash2[:]...)
+	spend := crypto.NewKeyFromSeed(seed)
+	view := crypto.NewKeyFromSeed(src)
+
+	return HXAddress{
+		PrivateSpendKey: spend,
+		PrivateViewKey:  view,
+		PublicSpendKey:  spend.Public(),
+		PublicViewKey:   view.Public(),
+	}
 }
 
 func KeyFromString(s string) (Key, error) {
