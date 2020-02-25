@@ -5,13 +5,16 @@ import (
 	"errors"
 	"strconv"
 	"strings"
-
+	// "time"
+	"fmt"
 	"github.com/MixinNetwork/mixin/crypto"
 	"github.com/btcsuite/btcutil/base58"
+	"github.com/dgrijalva/jwt-go"	
 )
 
 // Symobl
 const HXNetwork = "HX"
+const HXKeyStore = "HXKS"
 
 // 地址数据结构，由三对密钥构成，分别为 SpendKey，ViewKey，和EncryptKey
 // SpendKey 和 ViewKey 是基于 Ed25519 生成的 256位密钥
@@ -35,11 +38,6 @@ func NewAddress() (*Address, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// vk, err := NewKey()
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	ek, err := NewECIESPrivateKey()
 	if err != nil {
@@ -66,6 +64,48 @@ func NewAddress() (*Address, error) {
 		publicEncryptKey: pek,
 	}, nil
 }
+
+func (a Address) KeyStone() string {
+	data := append([]byte(HXKeyStore), a.privateSpendKey[:]...)
+	data = append(data, a.privateViewKey[:]...)
+	data = append(data, a.privateEncryptKey...)
+	checksum := crypto.NewHash(data)
+
+	data = append(a.privateSpendKey[:], a.privateViewKey[:]...)
+	data = append(data, a.privateEncryptKey...)
+	data = append(data, checksum[:4]...)
+
+	return HXKeyStore + base58.Encode(data)
+}
+
+// 通过字符串生成用户地址
+// 字符串格式
+//
+// 返回地址或者错误
+func AddressFromKeyStone(s string) (Address, error) {
+	var a Address
+	if !strings.HasPrefix(s, HXKeyStore) {
+		return a, errors.New("invalid address keystone")
+	}
+	data := base58.Decode(s[len(HXKeyStore):])
+	if len(data) != 189 {
+		return a, errors.New("invalid address format")
+	}
+	checksum := crypto.NewHash(append([]byte(HXKeyStore), data[:185]...))
+	if !bytes.Equal(checksum[:4], data[185:]) {
+		return a, errors.New("invalid address checksum")
+	}
+
+	// 分配 91 bytes 的存储空间
+	a.privateEncryptKey = make([]byte, 121)
+
+	copy(a.privateSpendKey[:], data[:32])
+	copy(a.privateViewKey[:], data[32:64])
+	copy(a.privateEncryptKey[:], data[64:])
+
+	return a, nil
+}
+
 
 // 根据用户的地址生成对外的交易地址
 // 地址的格式规定如下
@@ -208,4 +248,61 @@ func (a Address) VerifyOutputs(outputs []*Output) []int {
 	return verifiedOutputs
 }
 
+/*
+	{
+    "iss": "HXxxxx", // 用户的Address
+    "exp": 123, // 过期时间
+    "iat": 123, // 当前时间
+    "nc": "nonce", // 随机的nonce用于防重放
+    "sig": "xxx" // 签名
+}
+*/
+func (a Address) ChainJWTToken() string {
+	sk := a.privateSpendKey
+	type HXClaims struct {
+		jwt.StandardClaims
+	}
+
+	claims := HXClaims{
+		jwt.StandardClaims{
+			// IssuedAt: time.Now().Unix(),
+			// ExpiresAt: 15000,
+			Issuer: a.String(),
+		},
+	}
+
+	token, _ := jwt.NewWithClaims(sk, claims).SignedString(sk)
+	return token
+}
+
+func (a Address) Verify(tokenString string) bool {
+	key := a.publicSpendKey
+
+	fmt.Println(key)
+	fmt.Println(tokenString)
+
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*Key); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
+		}
+	   
+	   return key, nil
+   })
+
+   if err != nil {
+	fmt.Println("token Invalid")
+	fmt.Println(err)
+	   return false
+   }
+
+   if token.Valid {
+
+
+		return true
+	} else {
+		fmt.Println("token Invalid")
+		return false
+	}
+
+}
 

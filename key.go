@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 
 	"github.com/MixinNetwork/mixin/crypto"
 	"github.com/dgrijalva/jwt-go"
@@ -122,9 +123,13 @@ func (k Key) Verify(signingString, signature string, key interface{}) error {
 		// Decode the signature
 		var err error
 		var s []byte
+
+		fmt.Println("===Sign===")
+		fmt.Println(signature)
 		if s, err = jwt.DecodeSegment(signature); err != nil {
 			return err
 		}
+		fmt.Println("======")
 		copy(sig[:], s)
 	}
 
@@ -149,10 +154,15 @@ func (k Key) Sign(signingString string, key interface{}) (string, error) {
 		return "", jwt.ErrInvalidKeyType
 	}
 
+	fmt.Println("===SignString===")
+	fmt.Println(signingString)
+	fmt.Println("===SignString===")
+
 	hasher := sha256.New()
 	hasher.Write([]byte(signingString))
-
+	
 	sig := edKey.Sign(hasher.Sum(nil))
+	
 	var s = make([]byte, 64)
 	copy(s, sig[:])
 	return jwt.EncodeSegment(s), nil

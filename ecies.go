@@ -13,6 +13,7 @@ import (
 type PrivateKey ecies.PrivateKey
 type PublicKey ecies.PublicKey
 
+
 func NewECIESPrivateKey() (*PrivateKey, error) {
 	pri, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
@@ -20,6 +21,10 @@ func NewECIESPrivateKey() (*PrivateKey, error) {
 	}
 	return (*PrivateKey)(ecies.ImportECDSA(pri)), nil
 }
+
+// func (key PrivateKey)Sign {
+// 	_, _, _ = Sign(rand.Reader, priv, hashed)
+// }
 
 func ECIESPrivateKeyFromBytes(s []byte) (*PrivateKey, error) {
 	pri, err := x509.ParseECPrivateKey(s)
