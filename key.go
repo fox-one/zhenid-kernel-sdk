@@ -6,8 +6,8 @@ import (
 	"encoding/hex"
 	"errors"
 
-	"github.com/MixinNetwork/mixin/crypto"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/fox-one/mixin/crypto"
 )
 
 type Key crypto.Key

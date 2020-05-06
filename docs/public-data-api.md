@@ -17,6 +17,7 @@ Authorization: Bearer **token**
 {
     "code": 0,
     "data": [{
+        "address": "HXxxxx",
         "name": "Hengxin 1",
         "endpoint": "https://api1.heng.xin"
     }]
@@ -39,6 +40,7 @@ Authorization: Bearer **token**
     "code": 0,
     "data": [{
         "id": 1,
+        "address": "HXxxxx",
         "name": "Hengxin 1",
         "endpoint": "https://service-api1.heng.xin"
     }]

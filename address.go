@@ -4,8 +4,8 @@ import (
 	"crypto/rand"
 	"io"
 
-	"github.com/MixinNetwork/mixin/crypto"
 	"github.com/ethereum/go-ethereum/crypto/ecies"
+	"github.com/fox-one/mixin/crypto"
 )
 
 type Address struct {

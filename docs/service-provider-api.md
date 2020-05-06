@@ -9,7 +9,7 @@
 ### 上传文件
 
 ```http
-POST /file
+POST /files
 
 Content-Type: multipart/form-data
 Authorization: Bearer **token**
@@ -19,24 +19,48 @@ Authorization: Bearer **token**
 
 ```form
 file: file
-permissions: [{"address":"HXxxxx","encrypted_key":"xxx","permission":"READ"}]
+ciphers: [{"a":"HXxxxx","k":"xxx","p":"READ"}]
 ```
 
 **Response:**
 
 ```javascript
 {
-    "data": {
-        "file_hash": "xxx"
-    },
-    "code": 0,
+  "code": 0,
+  "data": {
+    "file_hash": "61f954807ce17b252ceb170110bca4a575cb0e0035b0551072ef163ead8c78a0",
+    "file_size": 91
+  }
 }
 ```
 
-### 更新文件权限
+### 读取文件
 
 ```http
-PUT /file/:file-hash
+GET /files/:file-hash/:file-size
+
+Content-Type: application/json
+Authorization: Bearer **token**
+```
+
+**Response:**
+
+```javascript
+{
+  "code": 0,
+  "data": {
+    "url": "https://xxx",
+    "file_hash": "61f954807ce17b252ceb170110bca4a575cb0e0035b0551072ef163ead8c78a0",
+    "file_size": 91,
+    "ciphers": []
+  }
+}
+```
+
+### 修改文件权限
+
+```http
+PATCH /files/:file_hash/:file-size/ciphers
 
 Content-Type: application/json
 Authorization: Bearer **token**
@@ -47,12 +71,12 @@ Authorization: Bearer **token**
 ```javascript
 [{
     "action": "ADD",
-    "address": "HXxxx",
-    "encrypted_key": "xxx",
-    "permission":"READ" // READ or ADMIN
+    "a": "HXxxx",       // Hengxin Address
+    "k": "xxx",         // encrypted keys
+    "p":"READ"          // permission: READ or ADMIN
 }, {
     "action": "DEL",
-    "address": "HXxxx"
+    "a": "HXxxx"
 }]
 ```
 
@@ -60,17 +84,14 @@ Authorization: Bearer **token**
 
 ```javascript
 {
-    "data": {
-        "permissions": [{"address": "HXxxx", "permission": "READ"}]
-    },
-    "code": 0,
+    "code": 0
 }
 ```
 
-### 读取文件
+### 删除文件
 
 ```http
-GET /file/:file-hash
+DELETE /files/:file_hash/:file-size
 
 Content-Type: application/json
 Authorization: Bearer **token**
@@ -80,12 +101,7 @@ Authorization: Bearer **token**
 
 ```javascript
 {
-    "data": {
-        "permissions": [{"address": "HXxxx", "permission": "READ","encrypted_key": "xxx"}],
-        "file_type": "URL", // RAW OR URL
-        "file": "https://www.file.f/f"
-    },
-    "code": 0,
+    "code": 0
 }
 ```
 
